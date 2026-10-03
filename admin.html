@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spojko Admin</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+header {
+    background: #1769aa;
+    color: white;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.container {
+    max-width: 950px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px #0001;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin: 15px 0 7px;
+    font-weight: bold;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    background: white;
+}
+
+textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.primary {
+    background: #1769aa;
+    color: white;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.add {
+    background: #dcfce7;
+    color: #166534;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.delete {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.stop {
+    border: 1px solid #dbeafe;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 10px;
+    margin-top: 12px;
+}
+
+.stop-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stop-title strong {
+    color: #1769aa;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background: #f8fafc;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat strong {
+    display: block;
+    font-size: 25px;
+    color: #1769aa;
+}
+
+#sprava {
+    padding: 12px;
+    color: #1769aa;
+    font-weight: bold;
+}
+
+@media(max-width:600px) {
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>⚙️ Spojko Admin</h1>
+    <span>ADMIN</span>
+</header>
+
+<div class="container">
+
+    <div class="stats">
+        <div class="stat">
+            📍 Zastávky
+            <strong id="pocetZastavok">0</strong>
+        </div>
+
+        <div class="stat">
+            🚍 Spoje
+            <strong id="pocetSpojov">0</strong>
+        </div>
+
+        <div class="stat">
+            🔥 Firebase
+            <strong id="stav">...</strong>
+        </div>
+    </div>
+
+    <!-- ZASTÁVKY -->
+    <div class="card">
+        <h2>📍 Pridať zastávku</h2>
+
+        <form id="zastavkaForm">
+            <label>Názov zastávky</label>
+            <input id="nazovZastavky" placeholder="Púchov, autobusová stanica" required>
+
+            <label>Mesto</label>
+            <input id="mesto" required>
+
+            <label>Druh dopravy</label>
+            <select id="typZastavky">
+                <option>Autobus</option>
+                <option>Vlak</option>
+                <option>MHD</option>
+            </select>
+
+            <button type="submit" class="primary">+ Uložiť zastávku</button>
+        </form>
+    </div>
+
+    <!-- NOVÝ SPOJ -->
+    <div class="card">
+        <h2>🚆 Vytvoriť cestovný poriadok</h2>
+
+        <form id="spojForm">
+            <label>Typ dopravy</label>
+            <select id="typ">
+                <option>Autobus</option>
+                <option>Vlak</option>
+                <option>MHD</option>
+            </select>
+
+            <label>Číslo linky / spoja</label>
+            <input id="cislo" placeholder="Napr. 170" required>
+
+            <label>Dopravca</label>
+            <input id="dopravca" placeholder="Názov dopravcu">
+
+            <label>Názov trasy</label>
+            <input id="trasa" placeholder="Napr. Bytča – Žilina">
+
+            <label>Platnosť od</label>
+            <input type="date" id="platnostOd">
+
+            <label>Platnosť do</label>
+            <input type="date" id="platnostDo">
+
+            <label>Dni premávania</label>
+            <select id="dni">
+                <option value="Denne">Denne</option>
+                <option value="Pracovné dni">Pracovné dni</option>
+                <option value="Víkendy">Víkendy</option>
+                <option value="Sobota">Sobota</option>
+                <option value="Nedeľa">Nedeľa</option>
+            </select>
+
+            <label>📝 Poznámky k spoju</label>
+            <textarea id="poznamky" placeholder="Informácie o dopravcovi, linke, platnosti..."></textarea>
+
+            <hr style="margin:25px 0;border:0;border-top:1px solid #ddd">
+
+            <h2>📍 Zastávky a časy</h2>
+            <p style="color:#64748b">Pridávaj zastávky v poradí, v akom spoj premáva.</p>
+
+            <div id="zastavkySpoja"></div>
+
+            <button type="button" class="add" onclick="pridajZastavku()">+ PRIDAŤ ZASTÁVKU</button>
+            <button type="submit" class="primary">💾 ULOŽIŤ CELÝ SPOJ</button>
+        </form>
+    </div>
+
+    <!-- ZOZNAM SPOJOV -->
+    <div class="card">
+        <h2>📋 Vytvorené spoje</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Linka</th>
+                        <th>Doprava</th>
+                        <th>Trasa</th>
+                        <th>Zastávky</th>
+                        <th>Akcia</th>
+                    </tr>
+                </thead>
+                <tbody id="zoznam"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="sprava"></div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+// Vlož svoju Firebase konfiguráciu
+const firebaseConfig = {
+    apiKey: "AIzaSyCFDxh-OXcckEul0RwvfRXkUjZchVy9xvg"
+    authDomain: "spojko.firebaseapp.com",
+    projectId: "spojko",
+    storageBucket: "spojko.firebasestorage.app",
+    messagingSenderId: "805253867770",
+    appId: "1:805253867770:web:96e5bf549b40cb71790143",
+    measurementId: "G-HH2ZZV5C3G"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const zastavkyRef = collection(db, "zastavky");
+const spojeRef = collection(db, "spoje");
+
+let pocet = 0;
+
+window.pridajZastavku = function() {
+    pocet++;
+    const id = pocet;
+
+    const div = document.createElement("div");
+    div.className = "stop";
+
+    div.innerHTML = `
+        <div class="stop-title">
+            <strong>📍 Zastávka ${id}</strong>
+            <button type="button" class="delete" onclick="this.closest('.stop').remove()">Odstrániť</button>
+        </div>
+
+        <label>Názov zastávky</label>
+        <input class="stop-name" placeholder="Napr. Žilina, autobusová stanica" required>
+
+        <label>Čas príchodu</label>
+        <input type="time" class="stop-arrival">
+
+        <label>Čas odchodu</label>
+        <input type="time" class="stop-departure" required>
+
+        <label>Nástupište / Stanovište</label>
+        <input class="stop-platform" placeholder="Napr. 2">
+
+        <label>Poznámka</label>
+        <input class="stop-note" placeholder="Napr. prestup">
+    `;
+
+    document.getElementById("zastavkySpoja").appendChild(div);
+};
+
+// PRIDANIE ZASTÁVKOVEJ POLOŽKY DO DATABÁZY
+document.getElementById("zastavkaForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    try {
+        await addDoc(zastavkyRef, {
+            nazov: document.getElementById("nazovZastavky").value.trim(),
+            mesto: document.getElementById("mesto").value.trim(),
+            typ: document.getElementById("typZastavky").value,
+            vytvorene: new Date().toISOString()
+        });
+
+        e.target.reset();
+        document.getElementById("sprava").textContent = "✅ Zastávka bola pridaná.";
+        await nacitaj();
+    } catch(error) {
+        document.getElementById("sprava").textContent = "Chyba: " + error.message;
+    }
+});
+
+// ULOŽENIE CELÉHO SPOJA
+document.getElementById("spojForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const zastavky = [...document.querySelectorAll("#zastavkySpoja .stop")].map((element, index) => ({
+        poradie: index + 1,
+        nazov: element.querySelector(".stop-name").value.trim(),
+        prichod: element.querySelector(".stop-arrival").value,
+        odchod: element.querySelector(".stop-departure").value,
+        nastupiste: element.querySelector(".stop-platform").value.trim(),
+        poznamka: element.querySelector(".stop-note").value.trim()
+    }));
+
+    if (zastavky.length < 2) {
+        alert("Spoj musí mať aspoň dve zastávky!");
+        return;
+    }
+
+    try {
+        await addDoc(spojeRef, {
+            typ: document.getElementById("typ").value,
+            cislo: document.getElementById("cislo").value.trim(),
+            dopravca: document.getElementById("dopravca").value.trim(),
+            trasa: document.getElementById("trasa").value.trim(),
+            platnostOd: document.getElementById("platnostOd").value,
+            platnostDo: document.getElementById("platnostDo").value,
+            dni: document.getElementById("dni").value,
+            poznamky: document.getElementById("poznamky").value.trim(),
+            zastavky: zastavky,
+            vytvorene: new Date().toISOString()
+        });
+
+        e.target.reset();
+        document.getElementById("zastavkySpoja").innerHTML = "";
+        document.getElementById("sprava").textContent = "✅ Celý cestovný poriadok bol uložený!";
+        
+        pridajZastavku();
+        pridajZastavku();
+
+        await nacitaj();
+    } catch(error) {
+        document.getElementById("sprava").textContent = "Chyba: " + error.message;
+    }
+});
+
+// NAČÍTANIE DATABÁZY
+async function nacitaj() {
+    try {
+        const zastavky = await getDocs(zastavkyRef);
+        const spoje = await getDocs(spojeRef);
+
+        document.getElementById("pocetZastavok").textContent = zastavky.size;
+        document.getElementById("pocetSpojov").textContent = spoje.size;
+        document.getElementById("stav").textContent = "OK";
+
+        const zoznam = document.getElementById("zoznam");
+        zoznam.innerHTML = "";
+
+        spoje.forEach(s => {
+            const d = s.data();
+            const tr = document.createElement("tr");
+
+            const td1 = document.createElement("td");
+            td1.textContent = d.cislo || "";
+
+            const td2 = document.createElement("td");
+            td2.textContent = d.typ || "";
+
+            const td3 = document.createElement("td");
+            td3.textContent = d.trasa || "";
+
+            const td4 = document.createElement("td");
+            td4.textContent = (d.zastavky || []).length;
+
+            const td5 = document.createElement("td");
+            const btn = document.createElement("button");
+            btn.className = "delete";
+            btn.textContent = "Vymazať";
+
+            btn.onclick = async () => {
+                if (!confirm("Naozaj vymazať tento spoj?")) return;
+                try {
+                    await deleteDoc(doc(db, "spoje", s.id));
+                    await nacitaj();
+                } catch(error) {
+                    alert(error.message);
+                }
+            };
+
+            td5.appendChild(btn);
+            tr.append(td1, td2, td3, td4, td5);
+            zoznam.appendChild(tr);
+        });
+    } catch(error) {
+        document.getElementById("stav").textContent = "Chyba";
+        document.getElementById("sprava").textContent = error.message;
+    }
+}
+
+// Inicializácia pri načítaní
+pridajZastavku();
+pridajZastavku();
+nacitaj();
+</script>
+
+</body>
+                  </html>
