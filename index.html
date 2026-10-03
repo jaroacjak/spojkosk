@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spojko - Vyhľadávanie spojení</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* HORNÁ LIŠTA */
+header {
+    background: #2563eb;
+    color: white;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropbtn {
+    background: white;
+    color: #2563eb;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 9px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 48px;
+    left: 0;
+    background: white;
+    min-width: 180px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 20;
+}
+
+.dropdown-content button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    background: white;
+    text-align: left;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.dropdown-content button:hover {
+    background: #dbeafe;
+}
+
+.show {
+    display: block;
+}
+
+/* HLAVNÝ OBSAH */
+main {
+    max-width: 700px;
+    margin: 35px auto;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.search-box {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-top: 18px;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    font-size: 16px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #2563eb;
+}
+
+/* NAŠEPKÁVAČ */
+.autocomplete {
+    position: relative;
+}
+
+.suggestions {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestion {
+    padding: 13px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.suggestion:hover {
+    background: #dbeafe;
+}
+
+/* TLAČIDLO */
+.search-btn {
+    width: 100%;
+    margin-top: 28px;
+    padding: 16px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.search-btn:hover {
+    background: #1d4ed8;
+}
+
+/* VÝSLEDKY VYHĽADÁVANIA */
+#vysledky {
+    margin-top: 30px;
+}
+
+.spoj-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-left: 6px solid #2563eb;
+}
+
+.spoj-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+}
+
+.spoj-badge {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.spoj-times {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.time-box strong {
+    font-size: 22px;
+    color: #0f172a;
+    display: block;
+}
+
+.time-box span {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.duration-line {
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    border-top: 2px dashed #cbd5e1;
+    flex-grow: 1;
+    margin: 0 20px;
+    position: relative;
+    top: -5px;
+}
+
+.spoj-info {
+    font-size: 14px;
+    color: #475569;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.details-btn {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 8px 0 0 0;
+    font-size: 14px;
+}
+
+.stopy-list {
+    display: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+.stopy-list.active {
+    display: block;
+}
+
+.stopy-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+@media (max-width: 500px) {
+    header {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .logo {
+        font-size: 21px;
+    }
+
+    .dropbtn {
+        padding: 11px;
+        font-size: 13px;
+    }
+
+    main {
+        margin-top: 15px;
+        padding: 12px;
+    }
+
+    .search-box {
+        padding: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🚆 Spojko</div>
+
+    <div class="dropdown">
+        <button class="dropbtn" id="dropbtn" onclick="toggleMenu()">
+            <span id="typDopravy">Všetky typy</span> ▼
+        </button>
+
+        <div class="dropdown-content" id="menu">
+            <button onclick="vyber('Všetky typy')">🌐 Všetky typy</button>
+            <button onclick="vyber('Autobus')">🚌 Autobus</button>
+            <button onclick="vyber('Vlak')">🚆 Vlak</button>
+            <button onclick="vyber('MHD')">🚋 MHD</button>
+        </div>
+    </div>
+</header>
+
+<main>
+
+<h2>Kam cestujeme? 🌍</h2>
+
+<div class="search-box">
+<form id="searchForm">
+
+    <label for="odkial">📍 Odkiaľ</label>
+    <div class="autocomplete">
+        <input
+            type="text"
+            id="odkial"
+            placeholder="Zadaj miesto odchodu"
+            autocomplete="off"
+            required
+        >
+        <div class="suggestions" id="navrhOdkial"></div>
+    </div>
+
+    <label for="kam">🏁 Kam</label>
+    <div class="autocomplete">
+        <input
+            type="text"
+            id="kam"
+            placeholder="Zadaj cieľovú stanicu"
+            autocomplete="off"
+            required
+        >
+        <div class="suggestions" id="navrhKam"></div>
+    </div>
+
+    <label for="datum">📅 Dátum</label>
+    <input type="date" id="datum" required>
+
+    <label for="cas">🕒 Čas odchodu</label>
+    <input type="time" id="cas" required>
+
+    <button type="submit" class="search-btn">
+        🔍 HĽADAŤ SPOJE
+    </button>
+
+</form>
+</div>
+
+<div id="vysledky"></div>
+
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import {
+    getFirestore,
+    collection,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCFDxh-OXcckEul0RwvfRXkUjZchVy9xvg",
+    authDomain: "spojko.firebaseapp.com",
+    projectId: "spojko",
+    storageBucket: "spojko.firebasestorage.app",
+    messagingSenderId: "805253867770",
+    appId: "1:805253867770:web:96e5bf549b40cb71790143",
+    measurementId: "G-HH2ZZV5C3G"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let vybranaDoprava = "Všetky typy";
+let vsetkyZastavky = [];
+
+// Predvyplnenie aktuálneho dátumu a času
+const dnes = new Date();
+document.getElementById("datum").value = dnes.toISOString().split("T")[0];
+document.getElementById("cas").value = dnes.toTimeString().slice(0, 5);
+
+// Načítanie zastávok pre našepkávač z databázy
+async function nacitajZastavky() {
+    try {
+        const querySnapshot = await getDocs(collection(db, "zastavky"));
+        const zset = new Set();
+        
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.nazov) zset.add(data.nazov);
+        });
+
+        // Taktiež pridáme zastávky priamo z existujúcich spojov
+        const spojeSnapshot = await getDocs(collection(db, "spoje"));
+        spojeSnapshot.forEach(doc => {
+            const spoj = doc.data();
+            if (spoj.zastavky && Array.isArray(spoj.zastavky)) {
+                spoj.zastavky.forEach(z => {
+                    if (z.nazov) zset.add(z.nazov);
+                });
+            }
+        });
+
+        vsetkyZastavky = Array.from(zset);
+    } catch (error) {
+        console.error("Chyba pri načítavaní zastávok:", error);
+    }
+}
+
+// Obsluha našepkávača
+function nastavNasepkavac(inputId, boxId) {
+    const input = document.getElementById(inputId);
+    const box = document.getElementById(boxId);
+
+    input.addEventListener("input", () => {
+        const text = input.value.toLowerCase().trim();
+        box.innerHTML = "";
+
+        if (!text) {
+            box.style.display = "none";
+            return;
+        }
+
+        const vyhladane = vsetkyZastavky
+            .filter(z => z.toLowerCase().includes(text))
+            .slice(0, 6);
+
+        if (vyhladane.length === 0) {
+            box.style.display = "none";
+            return;
+        }
+
+        vyhladane.forEach(zastavka => {
+            const div = document.createElement("div");
+            div.className = "suggestion";
+            div.textContent = "📍 " + zastavka;
+            div.onclick = () => {
+                input.value = zastavka;
+                box.style.display = "none";
+            };
+            box.appendChild(div);
+        });
+
+        box.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(`#${inputId}`) && !e.target.closest(`#${boxId}`)) {
+            box.style.display = "none";
+        }
+    });
+}
+
+nastavNasepkavac("odkial", "navrhOdkial");
+nastavNasepkavac("kam", "navrhKam");
+
+// Rozbalovacie menu
+window.toggleMenu = function() {
+    document.getElementById("menu").classList.toggle("show");
+};
+
+window.vyber = function(typ) {
+    vybranaDoprava = typ;
+    document.getElementById("typDopravy").innerText = typ;
+    document.getElementById("menu").classList.remove("show");
+};
+
+document.addEventListener("click", (e) => {
+    if (!e.target.closest(".dropdown")) {
+        document.getElementById("menu").classList.remove("show");
+    }
+});
+
+// VYHĽADÁVANIE SPOJOV VO FIRESTORE
+document.getElementById("searchForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const odkial = document.getElementById("odkial").value.trim();
+    const kam = document.getElementById("kam").value.trim();
+    const casOdchodu = document.getElementById("cas").value;
+    const vysledkyDiv = document.getElementById("vysledky");
+
+    if (odkial.toLowerCase() === kam.toLowerCase()) {
+        alert("Odkiaľ a Kam nemôžu byť rovnaké!");
+        return;
+    }
+
+    vysledkyDiv.innerHTML = "<p style='text-align:center;'>🔍 Vyhľadávam spoje...</p>";
+
+    try {
+        const querySnapshot = await getDocs(collection(db, "spoje"));
+        const najdeneSpoje = [];
+
+        querySnapshot.forEach(docSnap => {
+            const spoj = docSnap.data();
+
+            // Filter podľa typu dopravy
+            if (vybranaDoprava !== "Všetky typy" && spoj.typ !== vybranaDoprava) {
+                return;
+            }
+
+            const zastavky = spoj.zastavky || [];
+            
+            // Hľadáme index zastávky 'Odkiaľ' a 'Kam'
+            const indexOdkial = zastavky.findIndex(z => 
+                z.nazov.toLowerCase().includes(odkial.toLowerCase())
+            );
+            const indexKam = zastavky.findIndex(z => 
+                z.nazov.toLowerCase().includes(kam.toLowerCase())
+            );
+
+            // Spoj je platný, ak obsahuje obe zastávky a 'Odkiaľ' je pred 'Kam'
+            if (indexOdkial !== -1 && indexKam !== -1 && indexOdkial < indexKam) {
+                const zOdkial = zastavky[indexOdkial];
+                const casOdchoduSpoja = zOdkial.odchod || zOdkial.prichod;
+
+                // Vyfiltrujeme spoje, ktoré odchádzajú po požadovanom čase
+                if (casOdchoduSpoja >= casOdchodu) {
+                    najdeneSpoje.push({
+                        id: docSnap.id,
+                        ...spoj,
+                        zastavkaStart: zOdkial,
+                        zastavkaCiel: zastavky[indexKam],
+                        mopZastavky: zastavky.slice(indexOdkial, indexKam + 1)
+                    });
+                }
+            }
+        });
+
+        // Zoradíme spoje podľa času odchodu
+        najdeneSpoje.sort((a, b) => {
+            const casA = a.zastavkaStart.odchod || a.zastavkaStart.prichod;
+            const casB = b.zastavkaStart.odchod || b.zastavkaStart.prichod;
+            return casA.localeCompare(casB);
+        });
+
+        vykresliVysledky(najdeneSpoje, odkial, kam);
+
+    } catch (error) {
+        console.error(error);
+        vysledkyDiv.innerHTML = `<p style="color:red; text-align:center;">Chyba pri vyhľadávaní: ${error.message}</p>`;
+    }
+});
+
+function vykresliVysledky(spoje, odkial, kam) {
+    const container = document.getElementById("vysledky");
+    container.innerHTML = "";
+
+    if (spoje.length === 0) {
+        container.innerHTML = `
+            <div class="spoj-card" style="text-align:center;">
+                <h3>❌ Žiadne spojenie sa nenašlo</h3>
+                <p>Skontrolujte názvy zastávok alebo skúste zmeniť čas odchodu.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `<h3>Nájdené spojenia (${spoje.length})</h3>`;
+
+    spoje.forEach((spoj, idx) => {
+        const card = document.createElement("div");
+        card.className = "spoj-card";
+
+        const casStart = spoj.zastavkaStart.odchod || spoj.zastavkaStart.prichod;
+        const casCiel = spoj.zastavkaCiel.prichod || spoj.zastavkaCiel.odchod;
+
+        const ikona = spoj.typ === "Vlak" ? "🚆" : (spoj.typ === "MHD" ? "🚋" : "🚌");
+
+        let htmlStopy = spoj.mopZastavky.map(z => `
+            <div class="stopy-item">
+                <span><b>${z.poradie}. ${z.nazov}</b> ${z.nastupiste ? '(Nást. ' + z.nastupiste + ')' : ''}</span>
+                <span>${z.prichod ? 'Príchod: ' + z.prichod : ''} ${z.odchod ? 'Odchod: ' + z.odchod : ''}</span>
+            </div>
+        `).join("");
+
+        card.innerHTML = `
+            <div class="spoj-header">
+                <div>
+                    <strong>${ikona} ${spoj.typ} ${spoj.cislo || ''}</strong> 
+                    <span style="color:#64748b; font-size:14px;">(${spoj.dopravca || 'Dopravca neuvedený'})</span>
+                </div>
+                <span class="spoj-badge">${spoj.dni || 'Premáva denne'}</span>
+            </div>
+
+            <div class="spoj-times">
+                <div class="time-box">
+                    <strong>${casStart}</strong>
+                    <span>${spoj.zastavkaStart.nazov}</span>
+                </div>
+                <div class="duration-line">➡️️</div>
+                <div class="time-box" style="text-align:right;">
+                    <strong>${casCiel}</strong>
+                    <span>${spoj.zastavkaCiel.nazov}</span>
+                </div>
+            </div>
+
+            ${spoj.poznamky ? `<div class="spoj-info">ℹ️ ${spoj.poznamky}</div>` : ''}
+
+            <button class="details-btn" onclick="toggleDetaily('${spoj.id}_${idx}')">
+                👇 Zobraziť trasa a zastávky
+            </button>
+
+            <div class="stopy-list" id="detaily_${spoj.id}_${idx}">
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin-bottom:10px;">
+                ${htmlStopy}
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+window.toggleDetaily = function(id) {
+    const el = document.getElementById(`detaily_${id}`);
+    if (el) {
+        el.classList.toggle("active");
+    }
+};
+
+nacitajZastavky();
+</script>
+
+</body>
+  </html>
