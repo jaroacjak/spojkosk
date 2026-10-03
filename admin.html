@@ -307,9 +307,8 @@ import {
     doc
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-// Vlož svoju Firebase konfiguráciu
 const firebaseConfig = {
-    apiKey: "AIzaSyCFDxh-OXcckEul0RwvfRXkUjZchVy9xvg"
+    apiKey: "AIzaSyCFDxh-OXcckEul0RwvfRXkUjZchVy9xvg",
     authDomain: "spojko.firebaseapp.com",
     projectId: "spojko",
     storageBucket: "spojko.firebasestorage.app",
@@ -358,7 +357,7 @@ window.pridajZastavku = function() {
     document.getElementById("zastavkySpoja").appendChild(div);
 };
 
-// PRIDANIE ZASTÁVKOVEJ POLOŽKY DO DATABÁZY
+// PRIDANIE ZASTÁVKY DO DATABÁZY
 document.getElementById("zastavkaForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -413,7 +412,7 @@ document.getElementById("spojForm").addEventListener("submit", async (e) => {
         e.target.reset();
         document.getElementById("zastavkySpoja").innerHTML = "";
         document.getElementById("sprava").textContent = "✅ Celý cestovný poriadok bol uložený!";
-        
+
         pridajZastavku();
         pridajZastavku();
 
@@ -484,4 +483,4 @@ nacitaj();
 </script>
 
 </body>
-                  </html>
+</html>
